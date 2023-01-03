@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  apache_server:
+    build: .
+    container_name: server
+    working_dir: /var/www/html/
+    ports:
+      - 1517:80
+    volumes:
+      - ./library-system:/var/www/html/
+    networks:
+      - abdul_network
+    depends_on:
+      - mariadb_server
+
+
+  admin_panel:
+    image: adminer
+    container_name: admin
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - mariadb_server
+    networks:
+      - abdul_network
+    environment:
+      ADMINER_DESIGN: hydra
+      ADMINER_DEFAULT_SERVER: mariadb-server
+
+  mariadb_server:
+    image: mariadb
+    container_name: db
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - library_system_data:/var/lib/mysql
+      - ./mariadb:/docker-entrypoint-initdb.d/
+    networks:
+      - abdul_network
+    environment:
+      MARIADB_DATABASE: library_system
+      MARIADB_ROOT_PASSWORD: abdulrahman
+  
+volumes:
+  library_system_data:
+
+networks:
+  abdul_network:
